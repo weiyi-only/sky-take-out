@@ -10,9 +10,11 @@ import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.dto.PasswordEditDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
+import com.sky.exception.PasswordEditFailedException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
 import com.sky.result.PageResult;
@@ -40,7 +42,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public Employee login(EmployeeLoginDTO employeeLoginDTO) {
         String username = employeeLoginDTO.getUsername();
         String password = employeeLoginDTO.getPassword();
-        password=DigestUtils.md5DigestAsHex(password.getBytes());
+        password = DigestUtils.md5DigestAsHex(password.getBytes());
         //1、根据用户名查询数据库中的数据
         Employee employee = employeeMapper.getByUsername(username);
 
@@ -69,7 +71,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public void save(EmployeeDTO employeeDTO) {
         Employee employee = new Employee();
-        BeanUtils.copyProperties(employeeDTO,employee);
+        BeanUtils.copyProperties(employeeDTO, employee);
         employee.setStatus(StatusConstant.ENABLE);
         employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
         employee.setCreateTime(LocalDateTime.now());
@@ -82,13 +84,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public PageResult PageQuery(EmployeePageQueryDTO employeePageQueryDTO) { //DTO已将页码和每页记录数传入，因此可以算出
         // select * from employee limit 0,10，通过Limit来控制
-        PageHelper.startPage(employeePageQueryDTO.getPage(),employeePageQueryDTO.getPageSize()); //页码和每页记录数传入
+        PageHelper.startPage(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize()); //页码和每页记录数传入
         //Page是固定的，Employee是每个用户的信息
         Page<Employee> page = employeeMapper.pageQuery(employeePageQueryDTO);//
         //要将page对象处理为PageResult对象
         long total = page.getTotal();
         List<Employee> result = page.getResult();
-        return new PageResult(total,result);
+        return new PageResult(total, result);
     }
 
     @Override
@@ -109,9 +111,30 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public void update(EmployeeDTO employeeDTO) {
         Employee employee = new Employee();
-        BeanUtils.copyProperties(employeeDTO,employee);
+        BeanUtils.copyProperties(employeeDTO, employee);
         employee.setUpdateUser(BaseContext.getCurrentId());
         employee.setUpdateTime(LocalDateTime.now());
         employeeMapper.update(employee);
+    }
+
+    @Override
+    public void editPassword(PasswordEditDTO passwordEditDTO) {
+        //Employee employee = employeeMapper.getById(BaseContext.getCurrentId());
+        //passwordEditDTO.setEmpId(BaseContext.getCurrentId());
+        Employee employee = employeeMapper.getById(passwordEditDTO.getEmpId());
+        String Oldpassword = DigestUtils.md5DigestAsHex(passwordEditDTO.getOldPassword().getBytes());
+        //passwordEditDTO.setOldPassword(DigestUtils.md5DigestAsHex(passwordEditDTO.getOldPassword().getBytes()));
+        if (!Oldpassword.equals(employee.getPassword())) {
+            //原密码错误
+            throw new PasswordEditFailedException(MessageConstant.OldPASSWORD_ERROR);
+        }
+        passwordEditDTO.setNewPassword(DigestUtils.md5DigestAsHex(passwordEditDTO.getNewPassword().getBytes()));
+        Employee emp = Employee.builder()
+                .id(employee.getId())
+                .password(passwordEditDTO.getNewPassword())
+                .updateUser(BaseContext.getCurrentId())
+                .updateTime(LocalDateTime.now())
+                .build();
+        employeeMapper.editPassword(emp);
     }
 }
