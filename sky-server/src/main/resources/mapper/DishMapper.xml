@@ -36,7 +36,7 @@
         </set>
         where id = #{id}
     </update>
-    <select id="list" resultType="com.sky.entity.Dish">
+    <select id="list" resultType="com.sky.entity.Dish" parameterType="Dish">
         select * from dish
         <where>
             <if test="name != null">
