@@ -12,4 +12,8 @@ sky:
     access-key-id: ${ALIBABA_ACCESS_KEY_ID}
     access-key-secret: ${ALIBABA_ACCESS_KEY_SECRET}
     bucket-name: weiyi-only
-
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    database: 0
