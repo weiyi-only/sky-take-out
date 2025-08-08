@@ -12,6 +12,10 @@ sky:
     access-key-id: ${ALIBABA_ACCESS_KEY_ID}
     access-key-secret: ${ALIBABA_ACCESS_KEY_SECRET}
     bucket-name: weiyi-only
+
+  wechat:
+    appid: wx59146ca0023e93d3
+    secret: e831b1a197f1af66653f3986739ed01d
 spring:
   redis:
     host: localhost
