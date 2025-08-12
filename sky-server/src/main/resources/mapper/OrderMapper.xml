@@ -12,7 +12,7 @@
             ,#{phone},#{address},#{consignee},#{estimatedDeliveryTime}
             ,#{deliveryStatus},#{packAmount},#{tablewareNumber},#{tablewareStatus})
     </insert>
-    <update id="update" parameterType="Orders">
+    <update id="update" parameterType="com.sky.entity.Orders">
         update orders
         <set>
             <if test="number != null"> number=#{number}, </if>
@@ -40,7 +40,7 @@
         </set>
         where id=#{id}
     </update>
-    <select id="pageQuery" resultType="Orders">
+    <select id="pageQuery" resultType="com.sky.entity.Orders">
         select * from orders
         <where>
             <if test="number != null and number!=''">
